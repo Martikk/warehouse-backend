@@ -1,0 +1,24 @@
+{
+  "name": "instock_with_dbs-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "db:migrate": "npx knex migrate:latest",
+    "db:seed": "npx knex seed:run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "knex": "^3.0.1",
+    "migrate": "^2.1.0",
+    "mysql2": "^3.6.1",
+    "validator": "^13.12.0"
+  }
+}
