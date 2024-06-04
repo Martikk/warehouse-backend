@@ -1,5 +1,11 @@
-const router = require("express").Router();
-const knex = require("knex")(require("../knexfile"));
+const express = require("express");
+const router = express.Router();
+const knex = require("knex");
+const knexConfig = require("../knexfile");
+
+const environment = process.env.NODE_ENV || "development";
+const config = knexConfig[environment];
+const db = knex(config);
 
 // Middleware for validating request body
 const validateRequestBody = async (req, res, next) => {
@@ -38,7 +44,7 @@ const validateRequestBody = async (req, res, next) => {
   }
 
   try {
-    const warehouseIdExists = await knex("warehouses")
+    const warehouseIdExists = await db("warehouses")
       .select("*")
       .where({ id: req.body.warehouse_id });
 
@@ -60,7 +66,7 @@ const validateRequestBody = async (req, res, next) => {
 // Get list of all Inventory Items
 router.get("/", async (_req, res) => {
   try {
-    const data = await knex("inventories")
+    const data = await db("inventories")
       .select(
         "inventories.id",
         "warehouses.warehouse_name",
@@ -82,7 +88,7 @@ router.get("/", async (_req, res) => {
 // Get details about a single inventory item.
 router.get("/:id", async (req, res) => {
   try {
-    const data = await knex("inventories")
+    const data = await db("inventories")
       .select(
         "inventories.id",
         "warehouses.warehouse_name",
@@ -111,11 +117,11 @@ router.get("/:id", async (req, res) => {
 router.post("/", validateRequestBody, async (req, res) => {
   try {
     const newInventoryItem = req.body;
-    const insertedInventoryItem = await knex("inventories").insert(
+    const insertedInventoryItem = await db("inventories").insert(
       newInventoryItem
     );
 
-    const newInventoryRecord = await knex("inventories")
+    const newInventoryRecord = await db("inventories")
       .select(
         "id",
         "warehouse_id",
@@ -140,7 +146,7 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedRows = await knex("inventories").where({ id }).del();
+    const deletedRows = await db("inventories").where({ id }).del();
 
     if (deletedRows === 0) {
       return res.status(404).json({
@@ -165,7 +171,7 @@ router.put("/:id", validateRequestBody, async (req, res) => {
 
   try {
     // check if the warehouse_id value does exist in the warehouses table
-    const warehouseCheck = await knex("warehouses").where({
+    const warehouseCheck = await db("warehouses").where({
       id: req.body.warehouse_id,
     });
 
@@ -177,7 +183,7 @@ router.put("/:id", validateRequestBody, async (req, res) => {
     }
 
     // check if inventory with id exist and update
-    const data = await knex("inventories")
+    const data = await db("inventories")
       .where({ id: req.params.id })
       .update(req.body);
     if (data === 0) {
@@ -187,7 +193,7 @@ router.put("/:id", validateRequestBody, async (req, res) => {
     }
 
     // display updated data
-    const updatedData = await knex("inventories")
+    const updatedData = await db("inventories")
       .where({ id: req.params.id })
       .select(
         "id",
